@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Spring Boot Application
+  app:
+    build: .
+    ports:
+      - "7979:7979"
+    networks:
+      - monitoring
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  # Grafana Visualization
+  grafana:
+    image: grafana/grafana:9.5.3
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+# Persistent volume for Grafana
+volumes:
+  grafana-storage:
+
+# Network for services
+networks:
+  monitoring:
+    driver: bridge
